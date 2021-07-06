@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">UserLoginRegApplication</string>
     <string name="demo_app">Demo App</string>
+    <string name="login">Log in</string>
+    <string name="register"><u>Create a new Account</u></string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="enter_username">Enter Username:</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="enter_address">Enter Address</string>
+    <string name="spinner_title">Security Questions</string>
+    <string name="map_key" translatable="false">AIzaSyDd5VwOglC20mWcc9O2fGI14XVq0-1Fg30</string>
+    <string name="profile">Edit</string>
+
+
 </resources>

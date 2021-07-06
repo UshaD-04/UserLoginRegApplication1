@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="questions">
+        <item>What was the name of your first pet ?</item>
+        <item>What is your favourite dish ?</item>
+        <item>what was the first film that you saw in a theature</item>
+        <item>What is the last name of your favourite elementory school teacher</item>
+        <item>What is the first name of your best friend in highschool</item>
+    </string-array>
+</resources>
