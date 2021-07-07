@@ -130,6 +130,7 @@ public class RegistrationActivity extends AppCompatActivity {
         findViewById(R.id.btnReg).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String fname = first_name.getText().toString();
                 String lname = last_name.getText().toString();
                 String add = address.getText().toString();
@@ -138,16 +139,12 @@ public class RegistrationActivity extends AppCompatActivity {
                 String dob1 = dob.getText().toString();
                 String sec_ans = security_ans.getText().toString();
                 String sec_que1 = sec_que;
-                Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-
-
                 UserModel model = new UserModel(random(), fname, lname, add, uname, pwd,
                         byteArray.toString(), dob1, sec_que1, sec_ans);
                 DatabaseHelper db = new DatabaseHelper(RegistrationActivity.this);
-                db.addUser(model);
+                db.updateUser(model);
 
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
 
             }
         });
@@ -178,11 +175,6 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         try {
             if (db.getAllUsers() != null) {
                 first_name.setText(db.getAllUsers().get(0).getFirst_name());
@@ -200,6 +192,12 @@ public class RegistrationActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
     }
 
@@ -313,10 +311,18 @@ public class RegistrationActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
 
             try {
-                byteArray = data.getData();
-                InputStream is = getContentResolver().openInputStream(data.getData());
-                Bitmap bitmap = BitmapFactory.decodeStream(is);
-                imageView.setImageBitmap(bitmap);
+                if(data.getData() == null){
+//                    byteArray = getCaptureImageOutputUri();
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    imageView.setImageBitmap(photo);
+                    byteArray = getImageUri(RegistrationActivity.this, photo);
+                }else{
+                    byteArray = data.getData();
+                    InputStream is = getContentResolver().openInputStream(byteArray);
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    imageView.setImageBitmap(bitmap);
+                }
+
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -324,6 +330,12 @@ public class RegistrationActivity extends AppCompatActivity {
 
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 
     private Uri getCaptureImageOutputUri() {
         Uri outputFileUri = null;

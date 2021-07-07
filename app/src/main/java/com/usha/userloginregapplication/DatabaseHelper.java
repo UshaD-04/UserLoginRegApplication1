@@ -28,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_NAME + "("
-            + COLUMN_ID + " INTEGER PRIMARY KEY,"
+            + COLUMN_ID + "  INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_FNAME + " TEXT,"
             + COLUMN_LNAME + " TEXT,"
             + COLUMN_ADDRESS + " TEXT,"
@@ -167,7 +167,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_QUE, model.getQuestions());
         values.put(COLUMN_ANS, model.getSec_ans());
 
-        db.update(TABLE_NAME, values, "id=?", new String[]{COLUMN_ID});
+        db.update(TABLE_NAME, values, "username=?", new String[]{model.getUsername()});
+
         db.close();
     }
 
