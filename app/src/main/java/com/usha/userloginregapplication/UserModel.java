@@ -9,14 +9,14 @@ public class UserModel {
     private String address;
     private String username;
     private String password;
-    private byte[] profilePic;
+    private String profilePic;
     private String dob;
     private String questions;
     private String sec_ans;
     UserModel(){}
 
     public UserModel(int id, String first_name, String last_name, String address, String username,
-                     String password, byte[] profilePic, String dob, String questions,String sec_ans) {
+                     String password, String profilePic, String dob, String questions,String sec_ans) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
@@ -85,11 +85,11 @@ public class UserModel {
         this.password = password;
     }
 
-    public byte[] getProfilePic() {
+    public String getProfilePic() {
         return profilePic;
     }
 
-    public void setProfilePic(byte[] profilePic) {
+    public void setProfilePic(String profilePic) {
         this.profilePic = profilePic;
     }
 

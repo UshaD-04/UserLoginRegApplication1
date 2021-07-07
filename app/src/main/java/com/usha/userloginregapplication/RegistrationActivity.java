@@ -14,9 +14,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +29,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -36,6 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +57,7 @@ public class RegistrationActivity extends AppCompatActivity {
     EditText password;
     EditText address;
     Spinner questions;
-    byte[] byteArray;
+    Uri byteArray;
     EditText security_ans;
     String sec_que;
 
@@ -80,7 +84,9 @@ public class RegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
-        db =new DatabaseHelper(this);
+        imageView = findViewById(R.id.imageViewProfilePic);
+
+        db = new DatabaseHelper(this);
         questions = findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.questions, android.R.layout.simple_spinner_item);
@@ -90,7 +96,7 @@ public class RegistrationActivity extends AppCompatActivity {
         questions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-               sec_que = array_que.get(position);
+                sec_que = array_que.get(position);
             }
 
             @Override
@@ -104,7 +110,6 @@ public class RegistrationActivity extends AppCompatActivity {
         permissions.add(WRITE_EXTERNAL_STORAGE);
         permissions.add(READ_EXTERNAL_STORAGE);
         permissionsToRequest = findUnAskedPermissions(permissions);
-
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -130,20 +135,18 @@ public class RegistrationActivity extends AppCompatActivity {
                 String add = address.getText().toString();
                 String uname = username.getText().toString();
                 String pwd = password.getText().toString();
-                String dob1 =dob.getText().toString();
+                String dob1 = dob.getText().toString();
                 String sec_ans = security_ans.getText().toString();
-                String sec_que1 =sec_que;
-                Intent intent = new Intent(RegistrationActivity.this,MainActivity.class);
+                String sec_que1 = sec_que;
+                Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
 
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
 
 
-
-                UserModel model = new UserModel(random(),fname,lname,add,uname,pwd,
-                        byteArray,dob1,sec_que1,sec_ans);
+                UserModel model = new UserModel(random(), fname, lname, add, uname, pwd,
+                        byteArray.toString(), dob1, sec_que1, sec_ans);
                 DatabaseHelper db = new DatabaseHelper(RegistrationActivity.this);
                 db.addUser(model);
-
 
 
             }
@@ -175,14 +178,13 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
 
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         try {
-            if(db.getAllUsers()!=null){
+            if (db.getAllUsers() != null) {
                 first_name.setText(db.getAllUsers().get(0).getFirst_name());
                 last_name.setText(db.getAllUsers().get(0).getLast_name());
                 address.setText(db.getAllUsers().get(0).getAddress());
@@ -190,16 +192,12 @@ public class RegistrationActivity extends AppCompatActivity {
                 password.setText(db.getAllUsers().get(0).getPassword());
                 dob.setText(db.getAllUsers().get(0).getDob());
                 security_ans.setText(db.getAllUsers().get(0).getQuestions());
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inMutable = true;
-                Bitmap bmp = BitmapFactory.decodeByteArray(db.getAllUsers().get(0).getProfilePic(), 0, db.getAllUsers().get(0).getProfilePic().length, options);
-                //Canvas canvas = new Canvas(bmp);
-                //imageView.setImageBitmap(db.getAllUsers().get(0).getProfilePic());
-                imageView.setImageBitmap(bmp);
-
+                String filePath = db.getAllUsers().get(0).getProfilePic();
+                Log.d("Register_Activity", "value = " + db.getAllUsers().get(0).getProfilePic());
+                imageView.setImageURI(Uri.parse(filePath));
 
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -216,6 +214,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         return result;
     }
+
     private boolean hasPermission(String permission) {
         if (canMakeSmores()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -224,6 +223,7 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         return true;
     }
+
     private boolean canMakeSmores() {
         return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
     }
@@ -312,24 +312,17 @@ public class RegistrationActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
 
-             imageView = findViewById(R.id.imageViewProfilePic);
-            Log.d("Registraction", "value = "+ requestCode+ " " +requestCode);
-            //if (requestCode == IMAGE_RESULT) {
-
-                String filePath = getImageFilePath(data);
-                if (filePath != null) {
-                    Bitmap selectedImage = BitmapFactory.decodeFile(filePath);
-                    imageView.setImageBitmap(selectedImage);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    byteArray = stream.toByteArray();
-                    //selectedImage.recycle();
-                }
-            //}
-
+            try {
+                byteArray = data.getData();
+                InputStream is = getContentResolver().openInputStream(data.getData());
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
         }
 
-  }
+    }
 
 
     private Uri getCaptureImageOutputUri() {
@@ -340,9 +333,11 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         return outputFileUri;
     }
+
     public String getImageFilePath(Intent data) {
         return getImageFromFilePath(data);
     }
+
     private String getImageFromFilePath(Intent data) {
         boolean isCamera = data == null || data.getData() == null;
 
@@ -358,6 +353,7 @@ public class RegistrationActivity extends AppCompatActivity {
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
+
     public int random() {
         Random generator = new Random();
         StringBuilder randomStringBuilder = new StringBuilder();
