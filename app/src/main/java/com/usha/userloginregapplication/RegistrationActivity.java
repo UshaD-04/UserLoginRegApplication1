@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class RegistrationActivity extends AppCompatActivity {
     ImageView imageView;
@@ -64,14 +66,21 @@ public class RegistrationActivity extends AppCompatActivity {
 
     private final static int ALL_PERMISSIONS_RESULT = 107;
     private final static int IMAGE_RESULT = 200;
+    private DatabaseHelper db;
 
-
+    private static final Pattern PASSWORD_PATTERN =
+            Pattern.compile("^" +
+                    "(?=.*[@#$%^&+=])" +     // at least 1 special character
+                    "(?=\\S+$)" +            // no white spaces
+                    ".{8,}" +                // at least 4 characters
+                    "$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
+        db =new DatabaseHelper(this);
         questions = findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.questions, android.R.layout.simple_spinner_item);
@@ -123,8 +132,11 @@ public class RegistrationActivity extends AppCompatActivity {
                 String pwd = password.getText().toString();
                 String dob1 =dob.getText().toString();
                 String sec_ans = security_ans.getText().toString();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 String sec_que1 =sec_que;
+                Intent intent = new Intent(RegistrationActivity.this,MainActivity.class);
+
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+
 
 
                 UserModel model = new UserModel(random(),fname,lname,add,uname,pwd,
@@ -163,6 +175,33 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            if(db.getAllUsers()!=null){
+                first_name.setText(db.getAllUsers().get(0).getFirst_name());
+                last_name.setText(db.getAllUsers().get(0).getLast_name());
+                address.setText(db.getAllUsers().get(0).getAddress());
+                username.setText(db.getAllUsers().get(0).getUsername());
+                password.setText(db.getAllUsers().get(0).getPassword());
+                dob.setText(db.getAllUsers().get(0).getDob());
+                security_ans.setText(db.getAllUsers().get(0).getQuestions());
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inMutable = true;
+                Bitmap bmp = BitmapFactory.decodeByteArray(db.getAllUsers().get(0).getProfilePic(), 0, db.getAllUsers().get(0).getProfilePic().length, options);
+                //Canvas canvas = new Canvas(bmp);
+                //imageView.setImageBitmap(db.getAllUsers().get(0).getProfilePic());
+                imageView.setImageBitmap(bmp);
+
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 

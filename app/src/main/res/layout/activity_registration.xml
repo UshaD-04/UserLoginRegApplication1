@@ -75,7 +75,6 @@
         android:layout_marginEnd="20dp"
         android:ems="10"
         android:hint="@string/enter_username"
-        android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"

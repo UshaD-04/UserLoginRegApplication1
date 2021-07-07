@@ -86,30 +86,89 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public UserModel getUser() {
-        UserModel userModel = new UserModel();
-        // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_NAME;
+        try {
+            UserModel userModel = new UserModel();
+            // Select All Query
+            String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        cursor.moveToFirst();
-        UserModel user = new UserModel();
-        user.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
-        user.setFirst_name(cursor.getString(cursor.getColumnIndex(COLUMN_FNAME)));
-        user.setLast_name(cursor.getString(cursor.getColumnIndex(COLUMN_LNAME)));
-        user.setAddress(cursor.getString(cursor.getColumnIndex(COLUMN_ADDRESS)));
-        user.setUsername(cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME)));
-        user.setPassword(cursor.getString(cursor.getColumnIndex(COLUMN_PASS)));
-        user.setProfilePic(cursor.getBlob(cursor.getColumnIndex(COLUMN_PROFILE)));
-        user.setDob(cursor.getString(cursor.getColumnIndex(COLUMN_DOB)));
-        user.setQuestions(cursor.getString(cursor.getColumnIndex(COLUMN_QUE)));
-        user.setSec_ans(cursor.getString(cursor.getColumnIndex(COLUMN_ANS)));
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(selectQuery, null);
+            cursor.moveToFirst();
+            UserModel user = new UserModel();
+            user.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
+            user.setFirst_name(cursor.getString(cursor.getColumnIndex(COLUMN_FNAME)));
+            user.setLast_name(cursor.getString(cursor.getColumnIndex(COLUMN_LNAME)));
+            user.setAddress(cursor.getString(cursor.getColumnIndex(COLUMN_ADDRESS)));
+            user.setUsername(cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME)));
+            user.setPassword(cursor.getString(cursor.getColumnIndex(COLUMN_PASS)));
+            user.setProfilePic(cursor.getBlob(cursor.getColumnIndex(COLUMN_PROFILE)));
+            user.setDob(cursor.getString(cursor.getColumnIndex(COLUMN_DOB)));
+            user.setQuestions(cursor.getString(cursor.getColumnIndex(COLUMN_QUE)));
+            user.setSec_ans(cursor.getString(cursor.getColumnIndex(COLUMN_ANS)));
 
-        Log.d("LoginActivity","User = "+user.getFirst_name()+" "+user.getLast_name());
+            Log.d("LoginActivity","User = "+user.getFirst_name()+" "+user.getLast_name());
+            return userModel;
 
-        return userModel;
+
+        }catch (Exception e){
+
+        }
+        return null;
+
     }
 
+    private static UserModel getUserDetails(Cursor cursor) {
 
+
+        return new UserModel(
+                cursor.getInt(cursor.getColumnIndex(COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_FNAME)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_LNAME)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_ADDRESS)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_PASS)),
+                cursor.getBlob(cursor.getColumnIndex(COLUMN_PROFILE)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_DOB)),
+                cursor.getString(cursor.getColumnIndex(COLUMN_QUE)),
+
+                cursor.getString(cursor.getColumnIndex(COLUMN_ANS)));
+    }
+
+    public ArrayList<UserModel> getAllUsers() {
+        ArrayList<UserModel> userModels = new ArrayList<UserModel>();
+        String selectQuery = "SELECT DISTINCT * FROM " + TABLE_NAME;
+        try {
+
+            Cursor c = this.getReadableDatabase()
+                    .rawQuery(selectQuery,null);
+            if (c != null && c.getCount() > 0) {
+                while (c.moveToNext()) {
+                    userModels.add(getUserDetails(c));
+                }
+                c.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userModels;
+    }
+
+    public void updateUser(UserModel model){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_ID, model.getId());
+        values.put(COLUMN_FNAME, model.getFirst_name());
+        values.put(COLUMN_LNAME, model.getLast_name());
+        values.put(COLUMN_ADDRESS, model.getAddress());
+        values.put(COLUMN_USERNAME, model.getUsername());
+        values.put(COLUMN_PASS, model.getPassword());
+        values.put(COLUMN_PROFILE, model.getProfilePic());
+        values.put(COLUMN_DOB, model.getDob());
+        values.put(COLUMN_QUE, model.getQuestions());
+        values.put(COLUMN_ANS, model.getSec_ans());
+
+        db.update(TABLE_NAME, values, "id=?", new String[]{COLUMN_ID});
+        db.close();
+    }
 
 }

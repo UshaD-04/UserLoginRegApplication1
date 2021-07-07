@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,12 +26,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     Button user_details;
     Button edit_userdetails;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
     private static final int REQUEST_CODE = 101;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fetchLocation();
 
 
-          }
+    }
 
     private void fetchLocation() {
         if (ActivityCompat.checkSelfPermission(
@@ -94,10 +98,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add:
+                DatabaseHelper db = new DatabaseHelper(MainActivity.this);
                 startActivity(new Intent(getApplicationContext(), RegistrationActivity.class));
                 return (true);
             default:
                 return (super.onOptionsItemSelected(item));
         }
+    }
+    public int random() {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt(100);
+        return randomLength;
     }
 }
