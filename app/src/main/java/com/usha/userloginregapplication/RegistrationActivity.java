@@ -142,7 +142,18 @@ public class RegistrationActivity extends AppCompatActivity {
                 UserModel model = new UserModel(random(), fname, lname, add, uname, pwd,
                         byteArray.toString(), dob1, sec_que1, sec_ans);
                 DatabaseHelper db = new DatabaseHelper(RegistrationActivity.this);
-                db.updateUser(model);
+
+                if(db.isTableExists("user",true)){
+                    if(db.getAllUsers().size() > 0){
+                        db.updateUser(model);
+                    }else{
+                        db.addUser(model);
+                    }
+
+                }else {
+                    db.addUser(model);
+
+                }
 
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
 
@@ -185,7 +196,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 dob.setText(db.getAllUsers().get(0).getDob());
                 security_ans.setText(db.getAllUsers().get(0).getQuestions());
                 String filePath = db.getAllUsers().get(0).getProfilePic();
-                Log.d("Register_Activity", "value = " + db.getAllUsers().get(0).getProfilePic());
+                Log.d("q        W", "value = " + db.getAllUsers().get(0).getProfilePic());
                 imageView.setImageURI(Uri.parse(filePath));
 
             }
@@ -370,12 +381,8 @@ public class RegistrationActivity extends AppCompatActivity {
         Random generator = new Random();
         StringBuilder randomStringBuilder = new StringBuilder();
         int randomLength = generator.nextInt(100);
-//        char tempChar;
-//        for (int i = 0; i < randomLength; i++){
-//            tempChar = (char) (generator.nextInt(96) + 32);
-//            randomStringBuilder.append(tempChar);
-//        }
         return randomLength;
     }
+
 
 }

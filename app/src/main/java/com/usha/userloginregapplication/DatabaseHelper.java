@@ -40,8 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_ANS + " TEXT" + ")";
 
 
-    public DatabaseHelper(Context context)
-    {
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -53,12 +52,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String query = "DROP TABLE IF EXISTS "+TABLE_NAME;
+        String query = "DROP TABLE IF EXISTS " + TABLE_NAME;
         db.execSQL(query);
         onCreate(db);
     }
-    public boolean addUser(UserModel c)
-    {
+
+    public boolean addUser(UserModel c) {
         boolean isSaved = false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -75,10 +74,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long rowInserted = db.insert(TABLE_NAME, null, values);
         db.close();
-        if(rowInserted != -1) {
+        if (rowInserted != -1) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -106,11 +104,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             user.setQuestions(cursor.getString(cursor.getColumnIndex(COLUMN_QUE)));
             user.setSec_ans(cursor.getString(cursor.getColumnIndex(COLUMN_ANS)));
 
-            Log.d("LoginActivity","User = "+user.getFirst_name()+" "+user.getLast_name());
+            Log.d("LoginActivity", "User = " + user.getFirst_name() + " " + user.getLast_name());
             return userModel;
 
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return null;
@@ -140,7 +138,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
 
             Cursor c = this.getReadableDatabase()
-                    .rawQuery(selectQuery,null);
+                    .rawQuery(selectQuery, null);
             if (c != null && c.getCount() > 0) {
                 while (c.moveToNext()) {
                     userModels.add(getUserDetails(c));
@@ -153,7 +151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return userModels;
     }
 
-    public void updateUser(UserModel model){
+    public void updateUser(UserModel model) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, model.getId());
@@ -172,4 +170,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public boolean ifExists(UserModel model) {
+        Cursor cursor = null;
+        String checkQuery = "select DISTINCT user from userdatabase where user = '" + TABLE_NAME + "'";
+//        String checkQuery = "SELECT " + COLUMN_USERNAME + " FROM " + TABLE_NAME + " WHERE " + COLUMN_USERNAME + "= '"+model.getUsername() + "'";
+        cursor = db.rawQuery(checkQuery, null);
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        return exists;
+    }
+
+    public boolean isTableExists(String tableName, boolean openDb) {
+        if (openDb) {
+            if (this.db == null || !this.db.isOpen()) {
+                this.db = getReadableDatabase();
+            }
+
+            if (!this.db.isReadOnly()) {
+                this.db.close();
+                this.db = getReadableDatabase();
+            }
+        }
+
+        Cursor cursor = this.getReadableDatabase().
+                rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
+
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
+                return true;
+            }
+        }
+        return false;
+
+    }
 }
